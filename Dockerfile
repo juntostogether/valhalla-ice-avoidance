@@ -1,1 +1,4 @@
-FROM ghcr.io/gis-ops/docker-valhalla/valhalla:latest
+FROM valhalla/valhalla:run-latest
+
+ENV VALHALLA_SERVICE_LIMITS='{"max_exclude_polygons": 50}'
+ENV VALHALLA_LOG_LEVEL=INFO
