@@ -1,37 +1,16 @@
 FROM valhalla/valhalla:build-latest
 
-# Install necessary tools
 RUN apt-get update && apt-get install -y wget curl
 
-# Create the build script
 RUN echo '#!/bin/bash\n\
 set -e\n\
 echo "Starting Valhalla setup..."\n\
-\n\
-# Download OSM data\n\
-if [ ! -f /data/northern-california.osm.pbf ]; then\n\
-  echo "Downloading Northern California OSM data..."\n\
-  wget -O /data/northern-california.osm.pbf https://download.geofabrik.de/north-america/us/california/norcal-latest.osm.pbf\n\
-fi\n\
-\n\
-# Build config\n\
-echo "Building Valhalla config..."\n\
-valhalla_build_config \\\n\
-  --mjolnir-tile-dir /data/valhalla \\\n\
-  --mjolnir-max-cache-size 1000000000 \\\n\
-  > /data/valhalla.json\n\
-\n\
-# Build tiles with limited concurrency\n\
-echo "Building tiles (this will take 20-30 minutes)..."\n\
-valhalla_build_tiles -c /data/valhalla.json -j 2 /data/northern-california.osm.pbf\n\
-\n\
-# Start service\n\
-echo "Starting Valhalla service..."\n\
-valhalla_service /data/valhalla.json 1\n\
+echo "Checking available commands..."\n\
+which valhalla_build_config || echo "valhalla_build_config not in PATH"\n\
+find / -name "valhalla_build_config" 2>/dev/null || echo "Cannot find valhalla_build_config"\n\
+ls -la /usr/local/bin/ | grep valhalla || echo "No valhalla binaries in /usr/local/bin"\n\
+ls -la /usr/bin/ | grep valhalla || echo "No valhalla binaries in /usr/bin"\n\
+echo "PATH is: $PATH"\n\
 ' > /start.sh && chmod +x /start.sh
 
-# Set working directory
-WORKDIR /data
-
-# Run the script
 CMD ["/start.sh"]
